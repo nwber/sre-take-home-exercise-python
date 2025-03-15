@@ -1,7 +1,10 @@
 import yaml
 import requests
 import time
+import logging
 from collections import defaultdict
+
+logger = logging.getLogger(__name__)
 
 # Function to load configuration from the YAML file
 def load_config(file_path):
@@ -15,12 +18,21 @@ def check_health(endpoint):
     headers = endpoint.get('headers')
     body = endpoint.get('body')
 
+    if method is None:
+        method = 'GET'
+
     try:
         response = requests.request(method, url, headers=headers, json=body)
-        if 200 <= response.status_code < 300:
-            return "UP"
-        else:
+
+        latency_ms = response.elapsed.total_seconds() * 1000
+
+        if latency_ms > 500:
             return "DOWN"
+        if (response.status_code < 200) | (response.status_code >= 300):
+            return "DOWN"
+        else:
+            return "UP"
+
     except requests.RequestException:
         return "DOWN"
 
@@ -31,7 +43,7 @@ def monitor_endpoints(file_path):
 
     while True:
         for endpoint in config:
-            domain = endpoint["url"].split("//")[-1].split("/")[0]
+            domain = endpoint["url"].split("//")[-1].split("/")[0].split(":")[0]
             result = check_health(endpoint)
 
             domain_stats[domain]["total"] += 1
