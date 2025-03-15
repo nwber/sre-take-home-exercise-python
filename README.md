@@ -34,10 +34,13 @@ uv pip install -r .\requirements.txt
 ## Running the application
 
 ```powershell
-uv run main.py <PATH_TO_YAML>
+uv run .\main.py <PATH_TO_YAML>
 
 # Example
-uv run main.py .\sample.yaml
+uv run .\main.py .\sample.yaml
+
+# View application logs 
+cat .\endpoint_health.log
 ```
 
 ## Changes
@@ -58,6 +61,6 @@ Set the timeout on the requests to 0.5s.
 
 Adding logging to make this more "Production Ready".
 
-Added examples of potential failure modes to the sample.yaml for testing.
+Added examples of potential failure modes to the `sample.yaml` for testing.
 
-TODO: As you add more endpoints, the requests can add up and could potentially take more than 15 seconds (or at least cause health checks to be ran less often than 15 seconds). To resolve this, I tried calling the endpoints asynchronously. I haven't tried doing this before in Python, and couldn't get it to work. It looks like the AIOHTTP library is more suited for this.
+Accounted for runtime when sleeping. While this is more accurate, it still does not account for cases where running all the requests takes longer than 15s. In this case, running the requests asynchronously would be a better solution. I tried to do this, but I haven't done anything with async Python before.

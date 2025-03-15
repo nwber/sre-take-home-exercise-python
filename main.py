@@ -50,6 +50,7 @@ def monitor_endpoints(file_path):
     domain_stats = defaultdict(lambda: {"up": 0, "total": 0})
 
     while True:
+        while_start = time.time()
         for endpoint in config:
             domain = endpoint["url"].split("//")[-1].split("/")[0].split(":")[0]
             result = check_health(endpoint)
@@ -64,8 +65,15 @@ def monitor_endpoints(file_path):
             logger.info(f"{domain} has {availability}% availability percentage")
 
         print("---")
-        logging.info("Sleeping for 15s...")
-        time.sleep(15)
+
+        # Only sleep for 15s since the start of this loop
+        while_end = time.time()
+        while_delta = while_end - while_start
+    
+        logger.info(f"Loop duration: {while_delta}s")
+        logger.info(f"Sleeping for {15 - while_delta}s")
+
+        time.sleep(15 - while_delta)
 
 # Entry point of the program
 if __name__ == "__main__":
