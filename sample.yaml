@@ -20,6 +20,9 @@
 - name: nbergeron's (currently broken) dev site
   url: https://nbergeron.dev:443
   method: GET
+- name: garfacts
+  url: https://garfacts.com:443
+  method: GET
 - name: Thailand S3 endpoint
   url: https://s3.ap-southeast-7.amazonaws.com
 - name: 1000ms response endpoint

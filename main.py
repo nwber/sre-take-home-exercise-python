@@ -4,10 +4,18 @@ import time
 import logging
 from collections import defaultdict
 
+# Logging config
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh = logging.FileHandler('endpoint_health.log')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 # Function to load configuration from the YAML file
 def load_config(file_path):
+    logger.info('Loading config...')
     with open(file_path, 'r') as file:
         return yaml.safe_load(file)
 
@@ -22,18 +30,18 @@ def check_health(endpoint):
         method = 'GET'
 
     try:
-        response = requests.request(method, url, headers=headers, json=body)
+        response = requests.request(method, url, headers=headers, json=body, timeout=0.5)
 
-        latency_ms = response.elapsed.total_seconds() * 1000
-
-        if latency_ms > 500:
-            return "DOWN"
         if (response.status_code < 200) | (response.status_code >= 300):
+            logger.warning(f"{method} {url} response code not 2XX")
             return "DOWN"
         else:
+            logger.info(f"{url} is UP!!!")
             return "UP"
+    
 
     except requests.RequestException:
+        logger.warning(f"{method} {url} failed.")
         return "DOWN"
 
 # Main function to monitor endpoints
@@ -53,9 +61,10 @@ def monitor_endpoints(file_path):
         # Log cumulative availability percentages
         for domain, stats in domain_stats.items():
             availability = round(100 * stats["up"] / stats["total"])
-            print(f"{domain} has {availability}% availability percentage")
+            logger.info(f"{domain} has {availability}% availability percentage")
 
         print("---")
+        logging.info("Sleeping for 15s...")
         time.sleep(15)
 
 # Entry point of the program
@@ -63,6 +72,7 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) != 2:
+        logger.error("Usage: python monitor.py <config_file_path>")
         print("Usage: python monitor.py <config_file_path>")
         sys.exit(1)
 

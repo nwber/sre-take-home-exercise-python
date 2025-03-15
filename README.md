@@ -5,6 +5,7 @@
 ### Requirements
 
 Python 3.13
+
 [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ```powershell
@@ -34,6 +35,9 @@ uv pip install -r .\requirements.txt
 
 ```powershell
 uv run main.py <PATH_TO_YAML>
+
+# Example
+uv run main.py .\sample.yaml
 ```
 
 ## Changes
@@ -48,6 +52,12 @@ Added another split on the endpoint url to remove any port numbers.
 
 Added latency check to the `check_health` function. Any response over 500ms fails.
 
-Implented early returns for unsatisfactory responses.
+Implented early returns for unsatisfactory response codes.
 
-As you add more endpoints, the requests can add up and could potentially take more than 15 seconds. To resolve this, I modified the request to be done asynchronously.
+Set the timeout on the requests to 0.5s.
+
+Adding logging to make this more "Production Ready".
+
+Added examples of potential failure modes to the sample.yaml for testing.
+
+TODO: As you add more endpoints, the requests can add up and could potentially take more than 15 seconds (or at least cause health checks to be ran less often than 15 seconds). To resolve this, I tried calling the endpoints asynchronously. I haven't tried doing this before in Python, and couldn't get it to work. It looks like the AIOHTTP library is more suited for this.
